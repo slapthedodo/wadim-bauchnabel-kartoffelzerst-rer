@@ -52,7 +52,7 @@ local Button2 = MainTab:CreateButton({
    Name = "niga",
    Callback = function()
       local success, err = pcall(function()
-          local tabButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper
+          local tabButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper.SellTab
           
           if tabButton then
               if tabButton:IsA("GuiButton") then
@@ -73,6 +73,29 @@ local Button2 = MainTab:CreateButton({
       if not success then warn(err) end
    end,
 })
+
+-- SETTINGS TAB
+local SettingsTab = Window:CreateTab("Settings", 4483362458)
+
+local UnloadButton = SettingsTab:CreateButton({
+   Name = "Unload UI",
+   Callback = function()
+      Rayfield:Destroy()
+   end,
+})
+
+local HideButton = SettingsTab:CreateButton({
+   Name = "Hide Menu",
+   Callback = function()
+      Rayfield:Notify({
+         Title = "Info",
+         Content = "Use 'Right Control' to hide the menu",
+         Duration = 5,
+         Image = 4483362458,
+      })
+   end,
+})
+
 
 Rayfield:Notify({
    Title = "karotten script",
