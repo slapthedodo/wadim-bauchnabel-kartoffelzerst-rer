@@ -48,9 +48,36 @@ local Button = MainTab:CreateButton({
    end,
 })
 
+local Button2 = MainTab:CreateButton({
+   Name = "niga",
+   Callback = function()
+      local success, err = pcall(function()
+          local tabButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper
+          
+          if tabButton then
+              if tabButton:IsA("GuiButton") then
+                  tabButton:Activate()
+                  print("active")
+              elseif firesignal then
+                  firesignal(tabButton.MouseButton1Click)
+                  print("MouseButton1Click")
+              else
+                  if firesignal then
+                      firesignal(tabButton.MouseButton1Down)
+                      firesignal(tabButton.MouseButton1Up)
+                  end
+                  print("wrapper fallback")
+              end
+          end
+      end)
+      if not success then warn(err) end
+   end,
+})
+
 Rayfield:Notify({
    Title = "karotten script",
    Content = "Bauchnabel geladen",
    Duration = 5,
    Image = 4483362458,
 })
+
