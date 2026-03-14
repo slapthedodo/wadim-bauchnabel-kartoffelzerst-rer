@@ -45,8 +45,15 @@ local Button2 = MainTab:CreateButton({
    Callback = function()
       pcall(function()
           local tabButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper.SellTab
-          if tabButton and firesignal then
-              firesignal(tabButton.MouseButton1Click)
+          if tabButton then
+              if tabButton:FindFirstChild("UICorner") then
+                  tabButton.Parent.Parent.Visible = true
+              end
+              if firesignal then
+                  firesignal(tabButton.MouseButton1Click)
+              else
+                  tabButton:FireSignal(tabButton.MouseButton1Click)
+              end
           end
       end)
    end,
