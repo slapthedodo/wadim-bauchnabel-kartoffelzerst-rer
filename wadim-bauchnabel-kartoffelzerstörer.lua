@@ -18,7 +18,6 @@ local Window = Rayfield:CreateWindow({
    KeySettings = {
       Title = "potototo script",
       Subtitle = "Key System",
-      Note = " ",
       FileName = "KeyPotato",
       SaveKey = true,
       GrabKeyFromSite = false,
