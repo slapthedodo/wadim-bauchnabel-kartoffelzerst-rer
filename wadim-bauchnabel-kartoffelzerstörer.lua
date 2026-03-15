@@ -28,89 +28,52 @@ local Window = Rayfield:CreateWindow({
 
 local MainTab = Window:CreateTab("Main", 4483362458)
 
-local AutoSellActive = false
-local AutoSellDelay = 1
-
-local AutoSellToggle = MainTab:CreateToggle({
-   Name = "Autosell golden carrots",
-   CurrentValue = false,
-   Flag = "AutoSell_Toggle",
-   Callback = function(Value)
-      AutoSellActive = Value
-      if Value then
-         Rayfield:Notify({
-            Title = "Autosell golden carrots",
-            Content = "Autosell golden carrots active",
-            Duration = 2,
-            Image = 4483362458,
-         })
-
-         task.spawn(function()
-            while AutoSellActive do
-               pcall(function()
-                  local sellTab = game.Players.LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper.SellTab
-                  if sellTab and firesignal then
-                     firesignal(sellTab.Activated)
-                  end
-                  
-                  task.wait(0.3)
-                  
-                  local goldenSelector = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.ContentArea.ItemsScroll.ManualSellCard.ManualSellContent.SelectorContainer.GoldenSelector
-                  if goldenSelector and firesignal then
-                     firesignal(goldenSelector.Activated)
-                  end
-                  
-                  task.wait(0.3)
-                  
-
-                  local sellButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.ContentArea.ItemsScroll.ManualSellCard.ManualSellContent.ButtonRow.SellAllButton
-                  if sellButton and firesignal then
-                     firesignal(sellButton.Activated)
-                  end
-
-                  task.wait(AutoSellDelay)
-               end)
-            end
-         end)
-      else
-         Rayfield:Notify({
-            Title = "AutoSell",
-            Content = "AutoSell deaktiviert",
-            Duration = 2,
-            Image = 4483362458,
-         })
-      end
+local Button = MainTab:CreateButton({
+   Name = "test",
+   Callback = function()
+      pcall(function()
+          local sellButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.ContentArea.ItemsScroll.ManualSellCard.ManualSellContent.ButtonRow.SellAllButton
+          if sellButton and firesignal then
+              firesignal(sellButton.MouseButton1Click)
+          end
+      end)
    end,
 })
 
-local DelaySlider = MainTab:CreateSlider({
-   Name = "AutoSell Delay",
-   Range = {0.5, 10},
-   Increment = 0.5,
-   Suffix = "s",
-   CurrentValue = 1,
-   Flag = "AutoSell_Delay",
-   Callback = function(Value)
-      AutoSellDelay = Value
+local Button2 = MainTab:CreateButton({
+   Name = "niga",
+   Callback = function()
+      pcall(function()
+          local tabButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper.SellTab
+          if tabButton then
+              if tabButton:FindFirstChild("UICorner") then
+                  tabButton.Parent.Parent.Visible = true
+              end
+              if firesignal then
+                  firesignal(tabButton.MouseButton1Click)
+              else
+                  tabButton:FireSignal(tabButton.MouseButton1Click)
+              end
+          end
+      end)
    end,
 })
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
 
-local UIToggleKeybind = SettingsTab:CreateKeybind({
-   Name = "UI Toggle Hotkey",
-   CurrentKeybind = "K",
-   HoldToInteract = false,
-   Flag = "UI_Toggle_Hotkey",
-   Callback = function(Key)
-      Window:Toggle()
-   end,
-})
-
 local UnloadButton = SettingsTab:CreateButton({
    Name = "Unload UI",
    Callback = function()
       Rayfield:Destroy()
+   end,
+})
+
+local Keybind = SettingsTab:CreateKeybind({
+   Name = "UI Toggle",
+   CurrentKeybind = "K",
+   HoldToInteract = false,
+   Flag = "UI_Toggle_Key",
+   Callback = function(Key)
    end,
 })
 
