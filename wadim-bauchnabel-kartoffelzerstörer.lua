@@ -108,27 +108,59 @@ local upgradeList = {
 }
 
 MainTab:CreateToggle({
-    Name = "Auto Buy All Upgrades",
+    Name = "Auto Buy Best Upgrade",
     CurrentValue = false,
     Flag = "ToggleUpgrade",
     Callback = function(Value)
         autoUpgradeClick = Value
-        
         if autoUpgradeClick then
             task.spawn(function()
+                local lastPrices = {}
+
                 while autoUpgradeClick do
-                    for _, upgradeName in ipairs(upgradeList) do
-                        if not autoUpgradeClick then break end
+                    local myPotatoes = getCurrentPotatoes()
+                    local remotes = getRemotes()
+                    
+                    if remotes and remotes:FindFirstChild("GetUpgradeCost") and remotes:FindFirstChild("PurchaseClickUpgrade") then
                         
-                        pcall(function()
-                            local remotes = getRemotes()
-                            if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                                remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                        local bestUpgradeToBuy = nil
+                        
+                        for _, upgradeName in ipairs(upgradeList) do
+                            if not autoUpgradeClick then break end
+                            
+
+                            if not lastPrices[upgradeName] then
+                                local success, cost = pcall(function()
+                                    return remotes.GetUpgradeCost:InvokeServer(upgradeName)
+                                end)
+                                if success and cost then
+                                    lastPrices[upgradeName] = tonumber(cost) or parseNumber(tostring(cost))
+                                end
                             end
-                        end)
+                            
+
+                            local currentPrice = lastPrices[upgradeName]
+                            if currentPrice and myPotatoes >= currentPrice then
+
+                                bestUpgradeToBuy = upgradeName
+                                break
+                            end
+                        end
                         
-                        task.wait(0.05) 
+
+                        if bestUpgradeToBuy then
+                            pcall(function()
+                                remotes.PurchaseClickUpgrade:FireServer(bestUpgradeToBuy)
+                            end)
+
+                            lastPrices[bestUpgradeToBuy] = nil
+                            
+
+                            task.wait(0.1)
+                        end
                     end
+                    
+                    task.wait(0.2) 
                 end
             end)
         end
