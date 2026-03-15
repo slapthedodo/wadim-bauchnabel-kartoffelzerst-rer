@@ -23,7 +23,7 @@ local Window = Rayfield:CreateWindow({
       GrabKeyFromSite = false,
       Key = {"Hello123"}
    },
-   Keybind = "K"
+   Keybind = nil
 })
 
 local MainTab = Window:CreateTab("Main", 4483362458)
@@ -103,7 +103,7 @@ local UIToggleKeybind = SettingsTab:CreateKeybind({
    HoldToInteract = false,
    Flag = "UI_Toggle_Hotkey",
    Callback = function(Key)
-      Window:Toggle()
+      pcall(function() Rayfield:ToggleUI() end)
    end,
 })
 
