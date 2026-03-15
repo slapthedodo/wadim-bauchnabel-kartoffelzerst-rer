@@ -3,6 +3,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local VIM = game:GetService("VirtualInputManager")
 
 local autoFarm = false
 local autoUpgradeClick = false
@@ -10,6 +11,7 @@ local autoPrestige = false
 local autoAscension = false
 local autoShop = false
 local autoGenerator = false
+local autoAntiAFK = false
 local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
@@ -413,6 +415,30 @@ MainTab:CreateToggle({
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
 
+SettingsTab:CreateToggle({
+    Name = "Anti-AFK",
+    CurrentValue = false,
+    Flag = "ToggleAntiAFK",
+    Callback = function(Value)
+        autoAntiAFK = Value
+        if autoAntiAFK then
+            task.spawn(function()
+                while autoAntiAFK do
+                    pcall(function()
+                        VIM:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                        task.wait(0.1)
+                        VIM:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+                        VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+                        task.wait(0.1)
+                        VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+                    end)
+                    task.wait(300)
+                end
+            end)
+        end
+    end,
+})
+
 local AutoHideToggle = SettingsTab:CreateToggle({
    Name = "Auto Hide Notifications",
    CurrentValue = false,
@@ -443,6 +469,7 @@ local UnloadButton = SettingsTab:CreateButton({
       autoFarm = false
       autoUpgradeClick = false
       autoGenerator = false
+      autoAntiAFK = false
       autoPrestige = false
       autoAscension = false
       autoShop = false
