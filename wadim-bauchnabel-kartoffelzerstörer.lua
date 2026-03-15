@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local autoFarm = false
 local autoUpgradeClick = false
 local autoPrestige = false
+local autoAscension = false
 local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
@@ -251,6 +252,33 @@ MainTab:CreateSlider({
    end,
 })
 
+MainTab:CreateToggle({
+   Name = "Auto Ascension",
+   CurrentValue = false,
+   Flag = "ToggleAscension",
+   Callback = function(Value)
+      autoAscension = Value
+      if Value then
+          task.spawn(function()
+              while autoAscension do
+                  pcall(function()
+                      local remotes = getRemotes()
+                      if remotes and remotes:FindFirstChild("GetAscensionInfo") then
+                          local info = remotes.GetAscensionInfo:InvokeServer()
+                          if info and info.CanAscend == true then
+                              if remotes:FindFirstChild("PerformAscension") then
+                                  remotes.PerformAscension:FireServer("abundance")
+                              end
+                          end
+                      end
+                  end)
+                  task.wait(5)
+              end
+          end)
+      end
+   end,
+})
+
 
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
@@ -285,6 +313,7 @@ local UnloadButton = SettingsTab:CreateButton({
       autoFarm = false
       autoUpgradeClick = false
       autoPrestige = false
+      autoAscension = false
       autoHideNotifications = false
       if notificationConn then notificationConn:Disconnect() end
       AutoSellActive = false
