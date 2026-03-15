@@ -103,16 +103,19 @@ local UIToggleKeybind = SettingsTab:CreateKeybind({
    HoldToInteract = false,
    Flag = "UI_Toggle_Hotkey",
    Callback = function(Key)
-      pcall(function() Rayfield:ToggleUI() end)
+      Rayfield:ToggleUI()
    end,
 })
 
 local UnloadButton = SettingsTab:CreateButton({
    Name = "Unload UI",
    Callback = function()
+      AutoSellActive = false
       Rayfield:Destroy()
    end,
 })
+
+Rayfield:LoadConfiguration()
 
 Rayfield:Notify({
    Title = "karotten script",
