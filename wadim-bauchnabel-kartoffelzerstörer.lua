@@ -91,43 +91,6 @@ local function getRemotes()
         ["rbxassetid://134776730454808 "] = "golden pot"
     }
 
-    local function scanAndBuy()
-        local potatoGui = LocalPlayer.PlayerGui:FindFirstChild("PotatoGameGUI")
-        if not potatoGui then return end
-        
-        local contentArea = potatoGui.Background.ContentArea
-        local shopGrid = contentArea:FindFirstChild("ShopGridWrapper", true)
-
-        if shopGrid then
-            local items = shopGrid:GetChildren()
-            
-            for _, item in pairs(items) do
-                if item:IsA("Frame") or item:IsA("ImageLabel") or string.find(item.Name, "Item") then
-                    local icon = item:FindFirstChild("CurrencyIcon", true)
-                    local buyButton = item:FindFirstChild("BuyButton", true)
-                    
-                    if icon and icon:IsA("ImageLabel") then
-                        if icon.Image == "" then 
-                            task.wait(.1) 
-                        end
-                        
-                        if allowedIcons[icon.Image] and buyButton then
-                            for _, eventName in pairs({"MouseButton1Click", "Activated"}) do
-                                local signal = buyButton:FindFirstChild(eventName) or buyButton[eventName]
-                                if signal then
-                                    for _, connection in pairs(getconnections(signal)) do
-                                        connection:Fire()
-                                    end
-                                end
-                            end
-                            task.wait(.1)
-                        end
-                    end
-                end
-            end
-        end
-    end
-
 
 MainTab:CreateToggle({
        Name = "Auto Click",
@@ -378,6 +341,19 @@ MainTab:CreateToggle({
    end,
 })
 
+local shopItemList = {
+    "galaxy_potato", "divine_potato", "eternal_potato", "watermelon_potato", "glacial_potato",
+    "phoenix_potato", "void_potato", "king_potato", "quantum_potato", "bubble_potato",
+    "honeycomb_potato", "leopard_potato", "kiwi_potato", "flat_potato", "diamond_potato",
+    "obsidian_potato", "ghostly_potato", "mechanical_potato", "enchanted_potato", "camouflage_potato",
+    "cloud_potato", "pixel_potato", "emoji_mystery_potato", "mystery_potato", "mystery_potato_3",
+    "potato_eyes", "potion_drop", "potion_production", "potion_click", "potion_luck",
+    "potion_golden", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
+    "white_potato", "fingerling_potato", "purple_majesty", "sweet_potato", "blue_potato",
+    "sprouting_potato", "crystal_potato", "rainbow_potato", "frozen_potato", "volcanic_potato",
+    "ancient_potato", "shy_potato", "neon_potato", "shopkeepers_stash", "spud_laboratory"
+}
+
 MainTab:CreateToggle({
    Name = "Auto Shop",
    CurrentValue = false,
@@ -387,19 +363,15 @@ MainTab:CreateToggle({
       if Value then
           task.spawn(function()
               while autoShop do
-                  pcall(function()
-                      local shopTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.ShopTabWrapper.ShopTab
-                      if shopTab and firesignal then
-                          firesignal(shopTab.Activated)
-                      end
-                  end)
-                  
-                  task.wait(1)
-                  
-                  for i = 1, 25 do
+                  for _, itemName in ipairs(shopItemList) do
                       if not autoShop then break end
-                      pcall(scanAndBuy)
-                      if i < 25 then task.wait(.5) end
+                      pcall(function()
+                          local remotes = getRemotes()
+                          if remotes and remotes:FindFirstChild("PurchaseShopPotato") then
+                              remotes.PurchaseShopPotato:FireServer(itemName)
+                          end
+                      end)
+                      task.wait(0.5)
                   end
                   
                   if autoShop then
