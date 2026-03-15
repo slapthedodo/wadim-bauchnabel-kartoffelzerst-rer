@@ -6,6 +6,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local autoFarm = false
 local autoUpgradeClick = false
+local autoPrestige = false
+local minPP = 1
 local sellThreshold = 0
 
 local Window = Rayfield:CreateWindow({
@@ -171,6 +173,51 @@ local AutoSellToggle = MainTab:CreateToggle({
    end,
 })
 
+MainTab:CreateToggle({
+   Name = "Auto Prestige",
+   CurrentValue = false,
+   Flag = "TogglePrestige",
+   Callback = function(Value)
+      autoPrestige = Value
+      if Value then
+          task.spawn(function()
+              while autoPrestige do
+                  task.wait(1)
+                  pcall(function()
+                      local ppObj = LocalPlayer.PlayerGui.PotatoGameGUI.Background.StatsArea.StatsScrollFrame.StatsContainer.SectionCard_Progress.PotentialPoints.Value
+                      local ppText = ""
+                      if ppObj:IsA("TextLabel") or ppObj:IsA("TextBox") then
+                          ppText = ppObj.Text
+                      else
+                          ppText = tostring(ppObj.Value or ppObj)
+                      end
+                      
+                      local ppValue = tonumber(ppText:match("%d+"))
+                      if ppValue and ppValue >= minPP then
+                          local remotes = getRemotes()
+                          if remotes and remotes:FindFirstChild("PerformPrestige") then
+                              remotes.PerformPrestige:FireServer()
+                          end
+                      end
+                  end)
+              end
+          end)
+      end
+   end,
+})
+
+MainTab:CreateSlider({
+   Name = "Minimum PP for Prestige",
+   Range = {1, 100},
+   Increment = 1,
+   Suffix = "PP",
+   CurrentValue = 1,
+   Flag = "MinPP_Slider",
+   Callback = function(Value)
+      minPP = Value
+   end,
+})
+
 local DelaySlider = MainTab:CreateSlider({
    Name = "AutoSell Delay",
    Range = {0.5, 10},
@@ -200,6 +247,7 @@ local UnloadButton = SettingsTab:CreateButton({
    Callback = function()
       autoFarm = false
       autoUpgradeClick = false
+      autoPrestige = false
       AutoSellActive = false
       Rayfield:Destroy()
    end,
