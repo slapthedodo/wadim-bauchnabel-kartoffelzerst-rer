@@ -281,15 +281,19 @@ local AutoHideToggle = SettingsTab:CreateToggle({
       if Value then
           task.spawn(function()
               while autoHideNotifications do
-                  task.wait(0.5)
+                  
                   pcall(function()
                       local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
                       if container and container.Visible then
                           container.Visible = false
-                      else
-                        container.Visible = true
+                          task.wait(20)
+                      
                       end
                   end)
+              end
+              while not autoHideNotifications do
+                container.Visible = true
+                task.wait(20)
               end
           end)
       end
