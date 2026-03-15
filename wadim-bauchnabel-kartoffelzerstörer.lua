@@ -342,10 +342,10 @@ MainTab:CreateToggle({
                   
                   task.wait(1)
                   
-                  for i = 1, 25 do
+                  for i = 1, 22 do
                       if not autoShop then break end
                       pcall(scanAndBuy)
-                      if i < 25 then task.wait(.5) end
+                      if i < 22 then task.wait(1) end
                   end
                   
                   if autoShop then
