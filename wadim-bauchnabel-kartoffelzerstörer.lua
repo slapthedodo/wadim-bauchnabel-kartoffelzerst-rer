@@ -97,7 +97,6 @@ MainTab:CreateToggle({
        end,
     })
 
--- Deine extrahierte Liste der Upgrades
 local upgradeList = {
     "stronger_hands", "padded_gloves", "steel_trowel", "golden_trowel",
     "farmers_instinct", "advanced_techniques", "grandfathers_wisdom",
@@ -117,24 +116,19 @@ MainTab:CreateToggle({
         if autoUpgradeClick then
             task.spawn(function()
                 while autoUpgradeClick do
-                    -- Gehe die Liste von oben nach unten durch
                     for _, upgradeName in ipairs(upgradeList) do
-                        -- Falls der Toggle während der Schleife ausgeschaltet wird: Sofort stop!
                         if not autoUpgradeClick then break end
                         
                         pcall(function()
                             local remotes = getRemotes()
                             if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                                -- Wir schicken den sauberen Namen an den Server
                                 remotes.PurchaseClickUpgrade:FireServer(upgradeName)
                             end
                         end)
                         
-                        -- Ganz kurze Pause zwischen den Upgrades (schont die Performance)
                         task.wait(0.1) 
                     end
                     
-                    -- Pause, bevor die Liste von vorne begonnen wird (z.B. alle 5 Sekunden)
                     task.wait(5) 
                 end
             end)
