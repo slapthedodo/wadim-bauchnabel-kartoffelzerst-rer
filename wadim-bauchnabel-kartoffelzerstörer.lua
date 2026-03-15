@@ -20,7 +20,7 @@ local Window = Rayfield:CreateWindow({
    ConfigurationSaving = {
       Enabled = true,
       FolderName = "karotte",
-      FileName = "WadimConfig"
+      FileName = "WadimConfig_" .. LocalPlayer.Name
    },
    Discord = {
       Enabled = false,
