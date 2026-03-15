@@ -170,6 +170,32 @@ local generatorList = {
     "potato_seedling"
 }
 
+local function getOwnedGenerators()
+    local owned = {}
+    local totalCount = 0
+    pcall(function()
+        local gui = LocalPlayer:FindFirstChild("PlayerGui")
+        local pg = gui and gui:FindFirstChild("PotatoGameGUI")
+        local bg = pg and pg:FindFirstChild("Background")
+        local ca = bg and bg:FindFirstChild("ContentArea")
+        local is = ca and ca:FindFirstChild("ItemsScroll")
+        local ogs = is and is:FindFirstChild("OwnedGeneratorsSection")
+        local oc = ogs and ogs:FindFirstChild("OwnedContent")
+        local grid = oc and oc:FindFirstChild("OwnedGeneratorsGrid")
+        
+        if grid then
+            for _, child in pairs(grid:GetChildren()) do
+                local baseName = child.Name:match("^(.-)_OwnedCard_%d+$")
+                if baseName then
+                    owned[baseName] = (owned[baseName] or 0) + 1
+                    totalCount = totalCount + 1
+                end
+            end
+        end
+    end)
+    return owned, totalCount
+end
+
 MainTab:CreateToggle({
     Name = "Auto Buy Best Generator",
     CurrentValue = false,
@@ -180,6 +206,57 @@ MainTab:CreateToggle({
         if autoGenerator then
             task.spawn(function()
                 while autoGenerator do
+                    pcall(function()
+                        local owned, totalCount = getOwnedGenerators()
+                        local bestOwnedIdx = #generatorList + 1
+                        
+                        for i, name in ipairs(generatorList) do
+                            if owned[name] and owned[name] > 0 then
+                                if i < bestOwnedIdx then bestOwnedIdx = i end
+                            end
+                        end
+                        
+                        local remotes = getRemotes()
+                        if remotes then
+                            -- Deletion of low tiers (keep best and one below)
+                            if bestOwnedIdx <= #generatorList then
+                                for i = bestOwnedIdx + 2, #generatorList do
+                                    local name = generatorList[i]
+                                    if owned[name] and owned[name] > 0 then
+                                        if remotes:FindFirstChild("DeleteGenerator") then
+                                            for _ = 1, owned[name] do
+                                                remotes.DeleteGenerator:FireServer(name)
+                                                totalCount = totalCount - 1
+                                                task.wait(0.05)
+                                            end
+                                            owned[name] = 0
+                                        end
+                                    end
+                                end
+                            end
+                            
+                            -- Max 15 items limit
+                            while totalCount >= 15 do
+                                local worstIdx = 0
+                                for i = #generatorList, 1, -1 do
+                                    if owned[generatorList[i]] and owned[generatorList[i]] > 0 then
+                                        worstIdx = i
+                                        break
+                                    end
+                                end
+                                if worstIdx > 0 and remotes:FindFirstChild("DeleteGenerator") then
+                                    local name = generatorList[worstIdx]
+                                    remotes.DeleteGenerator:FireServer(name)
+                                    owned[name] = owned[name] - 1
+                                    totalCount = totalCount - 1
+                                    task.wait(0.05)
+                                else
+                                    break
+                                end
+                            end
+                        end
+                    end)
+
                     for _, genName in ipairs(generatorList) do
                         if not autoGenerator then break end
                         
@@ -347,8 +424,8 @@ local shopItemList = {
     "honeycomb_potato", "leopard_potato", "kiwi_potato", "flat_potato", "diamond_potato",
     "obsidian_potato", "ghostly_potato", "mechanical_potato", "enchanted_potato", "camouflage_potato",
     "cloud_potato", "pixel_potato", "emoji_mystery_potato", "mystery_potato", "mystery_potato_3",
-    "potato_eyes", "potion_drop", "potion_production", "potion_click", "potion_luck",
-    "potion_golden", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
+    "potato_eyes", "drop_chance_potion", "production_potion", "click_power_potion", "luck_potion",
+    "golden_potion", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
     "white_potato", "fingerling_potato", "purple_majesty", "sweet_potato", "blue_potato",
     "sprouting_potato", "crystal_potato", "rainbow_potato", "frozen_potato", "volcanic_potato",
     "ancient_potato", "shy_potato", "neon_potato", "shopkeepers_stash", "spud_laboratory"
