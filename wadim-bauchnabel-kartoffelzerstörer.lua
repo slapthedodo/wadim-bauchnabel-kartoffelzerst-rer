@@ -97,48 +97,64 @@ MainTab:CreateToggle({
        end,
     })
 
--- Deine extrahierte Liste der Upgrades
 local upgradeList = {
-    "stronger_hands", "padded_gloves", "steel_trowel", "golden_trowel",
-    "farmers_instinct", "advanced_techniques", "grandfathers_wisdom",
-    "lunar_planting", "dimensional_reach", "infinite_energy",
-    "omnipotato_blessing", "transcendent_harvest", "galactic_harvest",
-    "universal_potato_power", "infinite_potato_mastery", "omniversal_click",
-    "singularity_tap"
+    "finger_of_god",
+    "singularity_tap",
+    "omniversal_click",
+    "infinite_potato_mastery",
+    "universal_potato_power",
+    "galactic_harvest",
+    "transcendent_harvest",
+    "omnipotato_blessing",
+    "infinite_energy",
+    "dimensional_reach",
+    "lunar_planting",
+    "grandfathers_wisdom",
+    "advanced_techniques",
+    "farmers_instinct",
+    "golden_trowel",
+    "steel_trowel",
+    "padded_gloves",
+    "stronger_hands"
 }
 
 MainTab:CreateToggle({
-    Name = "Auto Buy All Upgrades",
+    Name = "Auto Buy (Smart Mode)",
     CurrentValue = false,
     Flag = "ToggleUpgrade",
     Callback = function(Value)
         autoUpgradeClick = Value
         
-        if autoUpgradeClick then
-            task.spawn(function()
-                while autoUpgradeClick do
-                    -- Gehe die Liste von oben nach unten durch
-                    for _, upgradeName in ipairs(upgradeList) do
-                        -- Falls der Toggle während der Schleife ausgeschaltet wird: Sofort stop!
-                        if not autoUpgradeClick then break end
-                        
-                        pcall(function()
-                            local remotes = getRemotes()
-                            if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                                -- Wir schicken den sauberen Namen an den Server
-                                remotes.PurchaseClickUpgrade:FireServer(upgradeName)
-                            end
-                        end)
-                        
-                        -- Ganz kurze Pause zwischen den Upgrades (schont die Performance)
-                        task.wait(0.1) 
-                    end
+        task.spawn(function()
+            while autoUpgradeClick do
+                local myPotatoes = getCurrentPotatoes() -- Deinen aktuellen Kontostand holen
+                
+                for _, upgradeName in ipairs(upgradeList) do
+                    if not autoUpgradeClick then break end
                     
-                    -- Pause, bevor die Liste von vorne begonnen wird (z.B. alle 5 Sekunden)
-                    task.wait(5) 
+                    -- Den Preis aus dem GUI lesen
+                    local itemFrame = guiPath:FindFirstChild(upgradeName .. "_Item")
+                    if itemFrame then
+                        -- Angenommen, der Preis steht in einem Label namens "Price" oder "Cost"
+                        local priceLabel = itemFrame:FindFirstChild("Price") or itemFrame:FindFirstChild("Cost") or itemFrame:FindFirstChildWhichIsA("TextLabel")
+                        
+                        if priceLabel then
+                            local price = parseNumber(priceLabel.Text)
+                            
+                            -- NUR an den Server senden, wenn wir genug Geld haben
+                            if myPotatoes >= price then
+                                pcall(function()
+                                    getRemotes().PurchaseClickUpgrade:FireServer(upgradeName)
+                                end)
+                                task.wait(0.2) -- Kurze Pause nach erfolgreichem Kauf
+                                myPotatoes = getCurrentPotatoes() -- Kontostand aktualisieren
+                            end
+                        end
+                    end
                 end
-            end)
-        end
+                task.wait(1) 
+            end
+        end)
     end,
 })
 
