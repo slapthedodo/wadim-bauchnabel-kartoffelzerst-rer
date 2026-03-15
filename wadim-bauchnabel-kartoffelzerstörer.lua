@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local autoFarm = false
 local autoUpgradeClick = false
 local autoPrestige = false
+local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
 
@@ -96,23 +97,50 @@ MainTab:CreateToggle({
        end,
     })
 
+-- Deine extrahierte Liste der Upgrades
+local upgradeList = {
+    "stronger_hands", "padded_gloves", "steel_trowel", "golden_trowel",
+    "farmers_instinct", "advanced_techniques", "grandfathers_wisdom",
+    "lunar_planting", "dimensional_reach", "infinite_energy",
+    "omnipotato_blessing", "transcendent_harvest", "galactic_harvest",
+    "universal_potato_power", "infinite_potato_mastery", "omniversal_click",
+    "singularity_tap"
+}
+
 MainTab:CreateToggle({
-       Name = "Auto Upgrade Click",
-       CurrentValue = false,
-       Flag = "ToggleUpgrade",
-       Callback = function(Value)
-            autoUpgradeClick = Value
+    Name = "Auto Buy All Upgrades",
+    CurrentValue = false,
+    Flag = "ToggleUpgrade",
+    Callback = function(Value)
+        autoUpgradeClick = Value
+        
+        if autoUpgradeClick then
             task.spawn(function()
                 while autoUpgradeClick do
-                    task.wait(2)
-                    pcall(function()
-                        local remotes = getRemotes()
-                        if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then remotes.PurchaseClickUpgrade:FireServer() end
-                    end)
+                    -- Gehe die Liste von oben nach unten durch
+                    for _, upgradeName in ipairs(upgradeList) do
+                        -- Falls der Toggle während der Schleife ausgeschaltet wird: Sofort stop!
+                        if not autoUpgradeClick then break end
+                        
+                        pcall(function()
+                            local remotes = getRemotes()
+                            if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
+                                -- Wir schicken den sauberen Namen an den Server
+                                remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                            end
+                        end)
+                        
+                        -- Ganz kurze Pause zwischen den Upgrades (schont die Performance)
+                        task.wait(0.1) 
+                    end
+                    
+                    -- Pause, bevor die Liste von vorne begonnen wird (z.B. alle 5 Sekunden)
+                    task.wait(5) 
                 end
             end)
-       end,
-    })
+        end
+    end,
+})
 
 MainTab:CreateButton({
        Name = "ð Claim Login & AFK Rewards",
@@ -173,6 +201,18 @@ local AutoSellToggle = MainTab:CreateToggle({
    end,
 })
 
+local DelaySlider = MainTab:CreateSlider({
+   Name = "AutoSell Delay",
+   Range = {0.25, 5},
+   Increment = 0.25,
+   Suffix = "s",
+   CurrentValue = 1,
+   Flag = "AutoSell_Delay",
+   Callback = function(Value)
+      AutoSellDelay = Value
+   end,
+})
+
 MainTab:CreateToggle({
    Name = "Auto Prestige",
    CurrentValue = false,
@@ -182,7 +222,7 @@ MainTab:CreateToggle({
       if Value then
           task.spawn(function()
               while autoPrestige do
-                  task.wait(1)
+                  task.wait(.5)
                   pcall(function()
                       local ppObj = LocalPlayer.PlayerGui.PotatoGameGUI.Background.StatsArea.StatsScrollFrame.StatsContainer.SectionCard_Progress.PotentialPoints.Value
                       local ppText = ""
@@ -218,17 +258,7 @@ MainTab:CreateSlider({
    end,
 })
 
-local DelaySlider = MainTab:CreateSlider({
-   Name = "AutoSell Delay",
-   Range = {0.5, 10},
-   Increment = 0.5,
-   Suffix = "s",
-   CurrentValue = 1,
-   Flag = "AutoSell_Delay",
-   Callback = function(Value)
-      AutoSellDelay = Value
-   end,
-})
+
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
 
@@ -242,12 +272,35 @@ local UIToggleKeybind = SettingsTab:CreateKeybind({
    end,
 })
 
+local AutoHideToggle = SettingsTab:CreateToggle({
+   Name = "Auto Hide Notifications",
+   CurrentValue = false,
+   Flag = "AutoHide_Notifications",
+   Callback = function(Value)
+      autoHideNotifications = Value
+      if Value then
+          task.spawn(function()
+              while autoHideNotifications do
+                  task.wait(0.5)
+                  pcall(function()
+                      local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
+                      if container and container.Visible then
+                          container.Visible = false
+                      end
+                  end)
+              end
+          end)
+      end
+   end,
+})
+
 local UnloadButton = SettingsTab:CreateButton({
    Name = "Unload UI",
    Callback = function()
       autoFarm = false
       autoUpgradeClick = false
       autoPrestige = false
+      autoHideNotifications = false
       AutoSellActive = false
       Rayfield:Destroy()
    end,
