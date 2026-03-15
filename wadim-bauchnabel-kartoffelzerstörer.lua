@@ -9,6 +9,7 @@ local autoUpgradeClick = false
 local autoPrestige = false
 local autoAscension = false
 local autoShop = false
+local autoGenerator = false
 local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
@@ -170,6 +171,57 @@ MainTab:CreateToggle({
                             local remotes = getRemotes()
                             if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
                                 remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                            end
+                        end)
+                        
+                        task.wait(.01) 
+                    end
+                end
+            end)
+        end
+    end,
+})
+
+local generatorList = {
+    "the_final_spud",
+    "the_spudularity",
+    "potato_infinite_universe",
+    "infinite_omnipotato",
+    "double_omnipotato",
+    "omnipotato",
+    "potato_nexus",
+    "superfactory_number_67",
+    "potato_galaxy",
+    "temporal_harvester",
+    "quantum_potato_generator",
+    "dimensional_mirror",
+    "cloning_facility",
+    "agricultural_lab",
+    "processing_plant",
+    "greenhouse",
+    "potato_farm",
+    "potato_garden",
+    "backyard_patch",
+    "potato_seedling"
+}
+
+MainTab:CreateToggle({
+    Name = "Auto Buy Best Generator",
+    CurrentValue = false,
+    Flag = "ToggleGenerator",
+    Callback = function(Value)
+        autoGenerator = Value
+        
+        if autoGenerator then
+            task.spawn(function()
+                while autoGenerator do
+                    for _, genName in ipairs(generatorList) do
+                        if not autoGenerator then break end
+                        
+                        pcall(function()
+                            local remotes = getRemotes()
+                            if remotes and remotes:FindFirstChild("PurchaseGenerator") then
+                                remotes.PurchaseGenerator:FireServer(genName)
                             end
                         end)
                         
@@ -390,6 +442,7 @@ local UnloadButton = SettingsTab:CreateButton({
    Callback = function()
       autoFarm = false
       autoUpgradeClick = false
+      autoGenerator = false
       autoPrestige = false
       autoAscension = false
       autoShop = false
