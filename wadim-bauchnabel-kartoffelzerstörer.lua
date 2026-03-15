@@ -226,7 +226,7 @@ MainTab:CreateToggle({
                                         if remotes:FindFirstChild("DeleteGenerator") then
                                             for _ = 1, owned[name] do
                                                 remotes.DeleteGenerator:FireServer(name)
-                                                local generatorsTab = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
+                                                local generatorsTab = game:GetService("Players").LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
                                                     if generatorsTab and firesignal then
                                                         firesignal(generatorsTab.Activated)
                                                     end
@@ -251,7 +251,7 @@ MainTab:CreateToggle({
                                 if worstIdx > 0 and remotes:FindFirstChild("DeleteGenerator") then
                                     local name = generatorList[worstIdx]
                                     remotes.DeleteGenerator:FireServer(name)
-                                    local generatorsTab = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
+                                    local generatorsTab = game:GetService("Players").LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
                                         if generatorsTab and firesignal then
                                             firesignal(generatorsTab.Activated)
                                         end
@@ -271,7 +271,7 @@ MainTab:CreateToggle({
                         pcall(function()
                             local remotes = getRemotes()
                             if remotes and remotes:FindFirstChild("PurchaseGenerator") then
-                                local generatorsTab = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
+                                local generatorsTab = game:GetService("Players").LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
                                     if generatorsTab and firesignal then
                                         firesignal(generatorsTab.Activated)
                                     end
@@ -460,7 +460,7 @@ MainTab:CreateToggle({
                               remotes.PurchaseShopPotato:FireServer(itemName)
                           end
                       end)
-                      task.wait(0.5)
+                      task.wait(0.1)
                   end
               end
           end)
