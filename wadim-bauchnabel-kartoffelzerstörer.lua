@@ -6,7 +6,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local autoFarm = false
 local autoUpgradeClick = false
-local autoSell = false
 local sellThreshold = 0
 
 local Window = Rayfield:CreateWindow({
@@ -141,8 +140,8 @@ local AutoSellToggle = MainTab:CreateToggle({
          })
 
          task.spawn(function()
-                while autoSell do
-                    task.wait(1)
+                while AutoSellActive do
+                    task.wait(AutoSellDelay)
                     pcall(function()
                         local shouldSell = true
                         if sellThreshold > 0 then
@@ -164,7 +163,7 @@ local AutoSellToggle = MainTab:CreateToggle({
       else
          Rayfield:Notify({
             Title = "AutoSell",
-            Content = "AutoSell deaktiviert",
+            Content = "AutoSell deavtivated",
             Duration = 2,
             Image = 4483362458,
          })
@@ -201,7 +200,6 @@ local UnloadButton = SettingsTab:CreateButton({
    Callback = function()
       autoFarm = false
       autoUpgradeClick = false
-      autoSell = false
       AutoSellActive = false
       Rayfield:Destroy()
    end,
