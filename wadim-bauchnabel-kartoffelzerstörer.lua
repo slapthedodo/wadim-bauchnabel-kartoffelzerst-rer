@@ -108,7 +108,7 @@ local upgradeList = {
 }
 
 MainTab:CreateToggle({
-    Name = "Auto Buy All Upgrades",
+    Name = "Auto Buy Best Upgrades",
     CurrentValue = false,
     Flag = "ToggleUpgrade",
     Callback = function(Value)
@@ -127,7 +127,7 @@ MainTab:CreateToggle({
                             end
                         end)
                         
-                        task.wait(0.05) 
+                        task.wait(0.02) 
                     end
                 end
             end)
