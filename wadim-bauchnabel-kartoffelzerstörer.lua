@@ -127,7 +127,7 @@ MainTab:CreateToggle({
                             end
                         end)
                         
-                        task.wait(0.02) 
+                        task.wait(.01) 
                     end
                 end
             end)
@@ -136,7 +136,7 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateButton({
-       Name = "ð Claim Login & AFK Rewards",
+       Name = "Claim Login & AFK Rewards",
        Callback = function()
             pcall(function()
                 local remotes = getRemotes()
@@ -254,16 +254,6 @@ MainTab:CreateSlider({
 
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
-
-local UIToggleKeybind = SettingsTab:CreateKeybind({
-   Name = "UI Toggle Hotkey",
-   CurrentKeybind = "K",
-   HoldToInteract = false,
-   Flag = "UI_Toggle_Hotkey",
-   Callback = function(Key)
-      pcall(function() Rayfield:ToggleUI() end)
-   end,
-})
 
 local AutoHideToggle = SettingsTab:CreateToggle({
    Name = "Auto Hide Notifications",
