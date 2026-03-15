@@ -27,7 +27,7 @@ local Window = Rayfield:CreateWindow({
       Invite = "noinvitelink", 
       RememberJoins = true 
    },
-   KeySystem = true,
+   KeySystem = false,
    KeySettings = {
       Title = "potototo script",
       Subtitle = "Key System",
