@@ -98,10 +98,8 @@ MainTab:CreateToggle({
                     local myPotatoes = getCurrentPotatoes()
                     local remotes = getRemotes()
                     
-                    if remotes and remotes:FindFirstChild("GetUpgradeCost") and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                        local bestUpgradeFound = nil
-                        
-                        -- Wir suchen zuerst das teuerste Upgrade, das wir uns leisten können
+                    if remotes and remotes:FindFirstChild("GetUpgradeCost") then
+                        -- Liste von oben (teuerste) nach unten durchgehen
                         for _, upgradeName in ipairs(upgradeList) do
                             if not autoUpgradeClick then break end
                             
@@ -113,24 +111,17 @@ MainTab:CreateToggle({
                                 local numericCost = tonumber(cost) or parseNumber(tostring(cost))
                                 
                                 if myPotatoes >= numericCost then
-                                    -- Da die Liste von TEUER nach BILLIG sortiert ist, 
-                                    -- ist das ERSTE Item, das wir uns leisten können, automatisch das BESTE.
-                                    bestUpgradeFound = upgradeName
-                                    break -- Wir haben das Beste gefunden, Suche abbrechen!
+                                    -- Kaufen!
+                                    pcall(function()
+                                        remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                                    end)
+                                    -- Da wir das teuerste gekauft haben, brechen wir diesen Durchlauf ab
+                                    break 
                                 end
                             end
                         end
-                        
-                        -- Nur wenn wir ein bezahlbares Upgrade gefunden haben, kaufen wir es
-                        if bestUpgradeFound then
-                            pcall(function()
-                                remotes.PurchaseClickUpgrade:FireServer(bestUpgradeFound)
-                            end)
-                        end
                     end
-                    
-                    -- Wartezeit kurz halten, damit er sofort wieder oben anfängt zu suchen
-                    task.wait(0.5) 
+                    task.wait(1) -- Jede Sekunde prüfen
                 end
             end)
         end
@@ -139,7 +130,7 @@ MainTab:CreateToggle({
 
 -- Claim Rewards
 MainTab:CreateButton({
-   Name = "Claim Login & AFK Rewards",
+   Name = "📅 Claim Login & AFK Rewards",
    Callback = function()
         pcall(function()
             local remotes = getRemotes()
