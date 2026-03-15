@@ -239,8 +239,8 @@ MainTab:CreateToggle({
                                 end
                             end
                             
-                            -- Max 15 items limit
-                            while totalCount >= 15 do
+                            -- Max 14 items limit
+                            while totalCount >= 14 do
                                 local worstIdx = 0
                                 for i = #generatorList, 1, -1 do
                                     if owned[generatorList[i]] and owned[generatorList[i]] > 0 then
