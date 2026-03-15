@@ -1,4 +1,4 @@
-local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -23,7 +23,7 @@ local Window = WindUI:CreateWindow({
 
 local MainTab = Window:Tab({
     Title = "Main",
-    Icon = "rbxassetid://4483362458"
+    Icon = "house"
 })
 
 local AutoSellActive = false
@@ -140,20 +140,17 @@ MainTab:Toggle({
     Value = false,
     Callback = function(Value)
         autoUpgradeClick = Value
-        
         if autoUpgradeClick then
             task.spawn(function()
                 while autoUpgradeClick do
                     for _, upgradeName in ipairs(upgradeList) do
                         if not autoUpgradeClick then break end
-                        
                         pcall(function()
                             local remotes = getRemotes()
                             if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
                                 remotes.PurchaseClickUpgrade:FireServer(upgradeName)
                             end
                         end)
-                        
                         task.wait(.01) 
                     end
                 end
@@ -170,7 +167,11 @@ MainTab:Button({
             if not remotes then return end
             if remotes:FindFirstChild("ClaimLoginStreak") then remotes.ClaimLoginStreak:FireServer() end
             if remotes:FindFirstChild("ClaimOfflineBoostBonus") then remotes.ClaimOfflineBoostBonus:FireServer() end
-            Window:Notify({Title = "Rewards Claimed!", Content = "Login streak and AFK earnings have been added to your wallet.", Duration = 4})
+            WindUI:Notify({
+                Title = "Rewards Claimed!",
+                Content = "Login streak and AFK earnings have been added to your wallet.",
+                Duration = 4
+            })
         end)
     end,
 })
@@ -181,12 +182,11 @@ MainTab:Toggle({
     Callback = function(Value)
         AutoSellActive = Value
         if Value then
-            Window:Notify({
+            WindUI:Notify({
                 Title = "Autosell golden carrots",
                 Content = "Autosell golden carrots active",
-                Duration = 2,
+                Duration = 2
             })
-
             task.spawn(function()
                 while AutoSellActive do
                     task.wait(AutoSellDelay)
@@ -209,10 +209,10 @@ MainTab:Toggle({
                 end
             end)
         else
-            Window:Notify({
+            WindUI:Notify({
                 Title = "AutoSell",
                 Content = "AutoSell deactivated",
-                Duration = 2,
+                Duration = 2
             })
         end
     end,
@@ -220,9 +220,10 @@ MainTab:Toggle({
 
 MainTab:Slider({
     Title = "AutoSell Delay",
-    Value = 1,
     Min = 0.25,
     Max = 5,
+    Step = 0.25,
+    Value = 1,
     Callback = function(Value)
         AutoSellDelay = Value
     end,
@@ -262,9 +263,10 @@ MainTab:Toggle({
 
 MainTab:Slider({
     Title = "Minimum PP for Prestige",
-    Value = 1,
     Min = 1,
     Max = 100,
+    Step = 1,
+    Value = 1,
     Callback = function(Value)
         minPP = Value
     end,
@@ -330,7 +332,7 @@ MainTab:Toggle({
 
 local SettingsTab = Window:Tab({
     Title = "Settings",
-    Icon = "rbxassetid://4483362458"
+    Icon = "settings"
 })
 
 SettingsTab:Toggle({
@@ -367,14 +369,16 @@ SettingsTab:Button({
         autoHideNotifications = false
         if notificationConn then notificationConn:Disconnect() end
         AutoSellActive = false
-        -- WindUI might have a different destroy method, usually Window:Close() or similar.
-        -- If WindUI doesn't expose a destroy method, we just stop the loops.
-        pcall(function() Window:Close() end)
+        -- WindUI doesn't have a direct Destroy method in the same way, usually it's Window:Close() or similar
+        -- But since we're using a loadstring library, we'll try to find a close method
+        if Window.Close then
+            Window:Close()
+        end
     end,
 })
 
-Window:Notify({
+WindUI:Notify({
     Title = "karotten script",
     Content = "Bauchnabel geladen",
-    Duration = 5,
+    Duration = 5
 })
