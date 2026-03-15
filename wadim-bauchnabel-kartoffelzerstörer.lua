@@ -1,4 +1,4 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local WindUI = loadstring(game:HttpGet("https://tree-hub.vercel.app/api/UI/WindUI"))()
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -14,135 +14,117 @@ local minPP = 1
 local sellThreshold = 0
 local notificationConn
 
-local Window = Rayfield:CreateWindow({
-   Name = "karotten script",
-   LoadingTitle = "Bauchnabel wird geladen",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "karotte",
-      FileName = "WadimConfig"
-   },
-   Discord = {
-      Enabled = false,
-      Invite = "noinvitelink", 
-      RememberJoins = true 
-   },
-   KeySystem = true,
-   KeySettings = {
-      Title = "potototo script",
-      Subtitle = "Key System",
-      Note = "get key from meine eier",
-      FileName = "KeyPotato",
-      SaveKey = true,
-      GrabKeyFromSite = false,
-      Key = {"Hello123"}
-   },
-   Keybind = "None"
+local Window = WindUI:CreateWindow({
+    Title = "karotten script",
+    Icon = "rbxassetid://4483362458",
+    Author = "Wadim",
+    Folder = "karotte"
 })
 
-local MainTab = Window:CreateTab("Main", 4483362458)
+local MainTab = Window:Tab({
+    Title = "Main",
+    Icon = "rbxassetid://4483362458"
+})
 
 local AutoSellActive = false
 local AutoSellDelay = 1
 
 local function getRemotes()
-        return ReplicatedStorage:FindFirstChild("Remotes")
-    end
+    return ReplicatedStorage:FindFirstChild("Remotes")
+end
 
-    local function parseNumber(str)
-        str = string.lower(tostring(str)):gsub(",", ""):gsub(" ", "")
-        local numStr, suffix = string.match(str, "^([%d%.]+)([a-z]*)$")
-        local num = tonumber(numStr)
-        if not num then return 0 end
-        
-        local multipliers = { k = 1e3, m = 1e6, b = 1e9, t = 1e12, qa = 1e15, qi = 1e18 }
-        if suffix and suffix ~= "" and multipliers[suffix] then num = num * multipliers[suffix] end
-        return num
-    end
+local function parseNumber(str)
+    str = string.lower(tostring(str)):gsub(",", ""):gsub(" ", "")
+    local numStr, suffix = string.match(str, "^([%d%.]+)([a-z]*)$")
+    local num = tonumber(numStr)
+    if not num then return 0 end
+    
+    local multipliers = { k = 1e3, m = 1e6, b = 1e9, t = 1e12, qa = 1e15, qi = 1e18 }
+    if suffix and suffix ~= "" and multipliers[suffix] then num = num * multipliers[suffix] end
+    return num
+end
 
-    local function getCurrentPotatoes()
-        local remotes = getRemotes()
-        if remotes and remotes:FindFirstChild("GetPlayerData") then
-            local suc, data = pcall(function() return remotes.GetPlayerData:InvokeServer() end)
-            if suc and type(data) == "table" then
-                if data.Potatoes then return parseNumber(data.Potatoes) end
-                if data.potatoes then return parseNumber(data.potatoes) end
+local function getCurrentPotatoes()
+    local remotes = getRemotes()
+    if remotes and remotes:FindFirstChild("GetPlayerData") then
+        local suc, data = pcall(function() return remotes.GetPlayerData:InvokeServer() end)
+        if suc and type(data) == "table" then
+            if data.Potatoes then return parseNumber(data.Potatoes) end
+            if data.potatoes then return parseNumber(data.potatoes) end
+        end
+    end
+    local ls = LocalPlayer:FindFirstChild("leaderstats") or LocalPlayer:FindFirstChild("Leaderstats")
+    if ls then
+        for _, v in pairs(ls:GetChildren()) do
+            local name = string.lower(v.Name)
+            if string.find(name, "potato") or string.find(name, "patates") then
+                return tonumber(v.Value) or parseNumber(v.Value)
             end
         end
-        local ls = LocalPlayer:FindFirstChild("leaderstats") or LocalPlayer:FindFirstChild("Leaderstats")
-        if ls then
-            for _, v in pairs(ls:GetChildren()) do
-                local name = string.lower(v.Name)
-                if string.find(name, "potato") or string.find(name, "patates") then
-                    return tonumber(v.Value) or parseNumber(v.Value)
-                end
-            end
-        end
-        return -1
     end
+    return -1
+end
 
-    local allowedIcons = {
-        ["rbxassetid://102427394468064"] = "pot",
-        ["rbxassetid://89085234677231"] = "cash",
-        ["rbxassetid://107549977624627"] = "pp",
-        ["rbxassetid://134776730454808 "] = "golden pot"
-    }
+local allowedIcons = {
+    ["rbxassetid://102427394468064"] = "pot",
+    ["rbxassetid://89085234677231"] = "cash",
+    ["rbxassetid://107549977624627"] = "pp",
+    ["rbxassetid://134776730454808 "] = "golden pot"
+}
 
-    local function scanAndBuy()
-        local potatoGui = LocalPlayer.PlayerGui:FindFirstChild("PotatoGameGUI")
-        if not potatoGui then return end
+local function scanAndBuy()
+    local potatoGui = LocalPlayer.PlayerGui:FindFirstChild("PotatoGameGUI")
+    if not potatoGui then return end
+    
+    local contentArea = potatoGui.Background.ContentArea
+    local shopGrid = contentArea:FindFirstChild("ShopGridWrapper", true)
+
+    if shopGrid then
+        local items = shopGrid:GetChildren()
         
-        local contentArea = potatoGui.Background.ContentArea
-        local shopGrid = contentArea:FindFirstChild("ShopGridWrapper", true)
-
-        if shopGrid then
-            local items = shopGrid:GetChildren()
-            
-            for _, item in pairs(items) do
-                if item:IsA("Frame") or item:IsA("ImageLabel") or string.find(item.Name, "Item") then
-                    local icon = item:FindFirstChild("CurrencyIcon", true)
-                    local buyButton = item:FindFirstChild("BuyButton", true)
+        for _, item in pairs(items) do
+            if item:IsA("Frame") or item:IsA("ImageLabel") or string.find(item.Name, "Item") then
+                local icon = item:FindFirstChild("CurrencyIcon", true)
+                local buyButton = item:FindFirstChild("BuyButton", true)
+                
+                if icon and icon:IsA("ImageLabel") then
+                    if icon.Image == "" then 
+                        task.wait(.1) 
+                    end
                     
-                    if icon and icon:IsA("ImageLabel") then
-                        if icon.Image == "" then 
-                            task.wait(.1) 
-                        end
-                        
-                        if allowedIcons[icon.Image] and buyButton then
-                            for _, eventName in pairs({"MouseButton1Click", "Activated"}) do
-                                local signal = buyButton:FindFirstChild(eventName) or buyButton[eventName]
-                                if signal then
-                                    for _, connection in pairs(getconnections(signal)) do
-                                        connection:Fire()
-                                    end
+                    if allowedIcons[icon.Image] and buyButton then
+                        for _, eventName in pairs({"MouseButton1Click", "Activated"}) do
+                            local signal = buyButton:FindFirstChild(eventName) or buyButton[eventName]
+                            if signal then
+                                for _, connection in pairs(getconnections(signal)) do
+                                    connection:Fire()
                                 end
                             end
-                            task.wait(.1)
                         end
+                        task.wait(.1)
                     end
                 end
             end
         end
     end
+end
 
-
-MainTab:CreateToggle({
-       Name = "Auto Click",
-       CurrentValue = false,
-       Flag = "ToggleFarm", 
-       Callback = function(Value)
-            autoFarm = Value
-            task.spawn(function()
-                while autoFarm do
-                    task.wait(0.01)
-                    pcall(function()
-                        local remotes = getRemotes()
-                        if remotes and remotes:FindFirstChild("PerformClick") then remotes.PerformClick:FireServer() end
-                    end)
-                end
-            end)
-       end,
-    })
+MainTab:Toggle({
+    Title = "Auto Click",
+    Value = false,
+    Callback = function(Value)
+        autoFarm = Value
+        task.spawn(function()
+            while autoFarm do
+                task.wait(0.01)
+                pcall(function()
+                    local remotes = getRemotes()
+                    if remotes and remotes:FindFirstChild("PerformClick") then remotes.PerformClick:FireServer() end
+                end)
+            end
+        end)
+    end,
+})
 
 local upgradeList = {
     "finger_of_god", "singularity_tap", "omniversal_click",
@@ -153,10 +135,9 @@ local upgradeList = {
     "steel_trowel", "padded_gloves", "stronger_hands"
 }
 
-MainTab:CreateToggle({
-    Name = "Auto Buy Best Upgrades",
-    CurrentValue = false,
-    Flag = "ToggleUpgrade",
+MainTab:Toggle({
+    Title = "Auto Buy Best Upgrades",
+    Value = false,
     Callback = function(Value)
         autoUpgradeClick = Value
         
@@ -181,34 +162,32 @@ MainTab:CreateToggle({
     end,
 })
 
-MainTab:CreateButton({
-       Name = "Claim Login & AFK Rewards",
-       Callback = function()
-            pcall(function()
-                local remotes = getRemotes()
-                if not remotes then return end
-                if remotes:FindFirstChild("ClaimLoginStreak") then remotes.ClaimLoginStreak:FireServer() end
-                if remotes:FindFirstChild("ClaimOfflineBoostBonus") then remotes.ClaimOfflineBoostBonus:FireServer() end
-                Rayfield:Notify({Title = "Rewards Claimed!", Content = "Login streak and AFK earnings have been added to your wallet.", Duration = 4, Image = 4483362458})
-            end)
-       end,
-    })
+MainTab:Button({
+    Title = "Claim Login & AFK Rewards",
+    Callback = function()
+        pcall(function()
+            local remotes = getRemotes()
+            if not remotes then return end
+            if remotes:FindFirstChild("ClaimLoginStreak") then remotes.ClaimLoginStreak:FireServer() end
+            if remotes:FindFirstChild("ClaimOfflineBoostBonus") then remotes.ClaimOfflineBoostBonus:FireServer() end
+            Window:Notify({Title = "Rewards Claimed!", Content = "Login streak and AFK earnings have been added to your wallet.", Duration = 4})
+        end)
+    end,
+})
 
-local AutoSellToggle = MainTab:CreateToggle({
-   Name = "Autosell golden carrots",
-   CurrentValue = false,
-   Flag = "AutoSell_Toggle",
-   Callback = function(Value)
-      AutoSellActive = Value
-      if Value then
-         Rayfield:Notify({
-            Title = "Autosell golden carrots",
-            Content = "Autosell golden carrots active",
-            Duration = 2,
-            Image = 4483362458,
-         })
+MainTab:Toggle({
+    Title = "Autosell golden carrots",
+    Value = false,
+    Callback = function(Value)
+        AutoSellActive = Value
+        if Value then
+            Window:Notify({
+                Title = "Autosell golden carrots",
+                Content = "Autosell golden carrots active",
+                Duration = 2,
+            })
 
-         task.spawn(function()
+            task.spawn(function()
                 while AutoSellActive do
                     task.wait(AutoSellDelay)
                     pcall(function()
@@ -229,182 +208,173 @@ local AutoSellToggle = MainTab:CreateToggle({
                     end)
                 end
             end)
-      else
-         Rayfield:Notify({
-            Title = "AutoSell",
-            Content = "AutoSell deavtivated",
-            Duration = 2,
-            Image = 4483362458,
-         })
-      end
-   end,
+        else
+            Window:Notify({
+                Title = "AutoSell",
+                Content = "AutoSell deactivated",
+                Duration = 2,
+            })
+        end
+    end,
 })
 
-local DelaySlider = MainTab:CreateSlider({
-   Name = "AutoSell Delay",
-   Range = {0.25, 5},
-   Increment = 0.25,
-   Suffix = "s",
-   CurrentValue = 1,
-   Flag = "AutoSell_Delay",
-   Callback = function(Value)
-      AutoSellDelay = Value
-   end,
+MainTab:Slider({
+    Title = "AutoSell Delay",
+    Value = 1,
+    Min = 0.25,
+    Max = 5,
+    Callback = function(Value)
+        AutoSellDelay = Value
+    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Auto Prestige",
-   CurrentValue = false,
-   Flag = "TogglePrestige",
-   Callback = function(Value)
-      autoPrestige = Value
-      if Value then
-          task.spawn(function()
-              while autoPrestige do
-                  task.wait(.5)
-                  pcall(function()
-                      local ppObj = LocalPlayer.PlayerGui.PotatoGameGUI.Background.StatsArea.StatsScrollFrame.StatsContainer.SectionCard_Progress.PotentialPoints.Value
-                      local ppText = ""
-                      if ppObj:IsA("TextLabel") or ppObj:IsA("TextBox") then
-                          ppText = ppObj.Text
-                      else
-                          ppText = tostring(ppObj.Value or ppObj)
-                      end
-                      
-                      local ppValue = tonumber(ppText:match("%d+"))
-                      if ppValue and ppValue >= minPP then
-                          local remotes = getRemotes()
-                          if remotes and remotes:FindFirstChild("PerformPrestige") then
-                              remotes.PerformPrestige:FireServer()
-                          end
-                      end
-                  end)
-              end
-          end)
-      end
-   end,
+MainTab:Toggle({
+    Title = "Auto Prestige",
+    Value = false,
+    Callback = function(Value)
+        autoPrestige = Value
+        if Value then
+            task.spawn(function()
+                while autoPrestige do
+                    task.wait(.5)
+                    pcall(function()
+                        local ppObj = LocalPlayer.PlayerGui.PotatoGameGUI.Background.StatsArea.StatsScrollFrame.StatsContainer.SectionCard_Progress.PotentialPoints.Value
+                        local ppText = ""
+                        if ppObj:IsA("TextLabel") or ppObj:IsA("TextBox") then
+                            ppText = ppObj.Text
+                        else
+                            ppText = tostring(ppObj.Value or ppObj)
+                        end
+                        
+                        local ppValue = tonumber(ppText:match("%d+"))
+                        if ppValue and ppValue >= minPP then
+                            local remotes = getRemotes()
+                            if remotes and remotes:FindFirstChild("PerformPrestige") then
+                                remotes.PerformPrestige:FireServer()
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+    end,
 })
 
-MainTab:CreateSlider({
-   Name = "Minimum PP for Prestige",
-   Range = {1, 100},
-   Increment = 1,
-   Suffix = "PP",
-   CurrentValue = 1,
-   Flag = "MinPP_Slider",
-   Callback = function(Value)
-      minPP = Value
-   end,
+MainTab:Slider({
+    Title = "Minimum PP for Prestige",
+    Value = 1,
+    Min = 1,
+    Max = 100,
+    Callback = function(Value)
+        minPP = Value
+    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Auto Ascension",
-   CurrentValue = false,
-   Flag = "ToggleAscension",
-   Callback = function(Value)
-      autoAscension = Value
-      if Value then
-          task.spawn(function()
-              while autoAscension do
-                  pcall(function()
-                      local remotes = getRemotes()
-                      if remotes and remotes:FindFirstChild("GetAscensionInfo") then
-                          local info = remotes.GetAscensionInfo:InvokeServer()
-                          if info and info.CanAscend == true then
-                              if remotes:FindFirstChild("PerformAscension") then
-                                  remotes.PerformAscension:FireServer("abundance")
-                              end
-                          end
-                      end
-                  end)
-                  task.wait(5)
-              end
-          end)
-      end
-   end,
+MainTab:Toggle({
+    Title = "Auto Ascension",
+    Value = false,
+    Callback = function(Value)
+        autoAscension = Value
+        if Value then
+            task.spawn(function()
+                while autoAscension do
+                    pcall(function()
+                        local remotes = getRemotes()
+                        if remotes and remotes:FindFirstChild("GetAscensionInfo") then
+                            local info = remotes.GetAscensionInfo:InvokeServer()
+                            if info and info.CanAscend == true then
+                                if remotes:FindFirstChild("PerformAscension") then
+                                    remotes.PerformAscension:FireServer("abundance")
+                                end
+                            end
+                        end
+                    end)
+                    task.wait(5)
+                end
+            end)
+        end
+    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Auto Shop",
-   CurrentValue = false,
-   Flag = "ToggleAutoShop",
-   Callback = function(Value)
-      autoShop = Value
-      if Value then
-          task.spawn(function()
-              while autoShop do
-                  pcall(function()
-                      local shopTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.ShopTabWrapper.ShopTab
-                      if shopTab and firesignal then
-                          firesignal(shopTab.Activated)
-                      end
-                  end)
-                  
-                  task.wait(1)
-                  
-                  for i = 1, 25 do
-                      if not autoShop then break end
-                      pcall(scanAndBuy)
-                      if i < 25 then task.wait(.5) end
-                  end
-                  
-                  if autoShop then
-                      task.wait(120)
-                  end
-              end
-          end)
-      end
-   end,
+MainTab:Toggle({
+    Title = "Auto Shop",
+    Value = false,
+    Callback = function(Value)
+        autoShop = Value
+        if Value then
+            task.spawn(function()
+                while autoShop do
+                    pcall(function()
+                        local shopTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.ShopTabWrapper.ShopTab
+                        if shopTab and firesignal then
+                            firesignal(shopTab.Activated)
+                        end
+                    end)
+                    
+                    task.wait(1)
+                    
+                    for i = 1, 25 do
+                        if not autoShop then break end
+                        pcall(scanAndBuy)
+                        if i < 25 then task.wait(.5) end
+                    end
+                    
+                    if autoShop then
+                        task.wait(120)
+                    end
+                end
+            end)
+        end
+    end,
 })
 
-
-
-local SettingsTab = Window:CreateTab("Settings", 4483362458)
-
-local AutoHideToggle = SettingsTab:CreateToggle({
-   Name = "Auto Hide Notifications",
-   CurrentValue = false,
-   Flag = "AutoHide_Notifications",
-   Callback = function(Value)
-      autoHideNotifications = Value
-      if notificationConn then notificationConn:Disconnect() notificationConn = nil end
-      
-      local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
-      if not container then return end
-
-      if autoHideNotifications then
-          container.Visible = false
-          notificationConn = container:GetPropertyChangedSignal("Visible"):Connect(function()
-              if autoHideNotifications then
-                  container.Visible = false
-              end
-          end)
-      else
-          container.Visible = true
-      end
-   end,
+local SettingsTab = Window:Tab({
+    Title = "Settings",
+    Icon = "rbxassetid://4483362458"
 })
 
-local UnloadButton = SettingsTab:CreateButton({
-   Name = "Unload UI",
-   Callback = function()
-      autoFarm = false
-      autoUpgradeClick = false
-      autoPrestige = false
-      autoAscension = false
-      autoShop = false
-      autoHideNotifications = false
-      if notificationConn then notificationConn:Disconnect() end
-      AutoSellActive = false
-      Rayfield:Destroy()
-   end,
+SettingsTab:Toggle({
+    Title = "Auto Hide Notifications",
+    Value = false,
+    Callback = function(Value)
+        autoHideNotifications = Value
+        if notificationConn then notificationConn:Disconnect() notificationConn = nil end
+        
+        local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
+        if not container then return end
+
+        if autoHideNotifications then
+            container.Visible = false
+            notificationConn = container:GetPropertyChangedSignal("Visible"):Connect(function()
+                if autoHideNotifications then
+                    container.Visible = false
+                end
+            end)
+        else
+            container.Visible = true
+        end
+    end,
 })
 
-Rayfield:LoadConfiguration()
+SettingsTab:Button({
+    Title = "Unload UI",
+    Callback = function()
+        autoFarm = false
+        autoUpgradeClick = false
+        autoPrestige = false
+        autoAscension = false
+        autoShop = false
+        autoHideNotifications = false
+        if notificationConn then notificationConn:Disconnect() end
+        AutoSellActive = false
+        -- WindUI might have a different destroy method, usually Window:Close() or similar.
+        -- If WindUI doesn't expose a destroy method, we just stop the loops.
+        pcall(function() Window:Close() end)
+    end,
+})
 
-Rayfield:Notify({
-   Title = "karotten script",
-   Content = "Bauchnabel geladen",
-   Duration = 5,
-   Image = 4483362458,
+Window:Notify({
+    Title = "karotten script",
+    Content = "Bauchnabel geladen",
+    Duration = 5,
 })
