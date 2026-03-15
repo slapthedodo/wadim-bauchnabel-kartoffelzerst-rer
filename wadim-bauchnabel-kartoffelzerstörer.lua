@@ -113,36 +113,6 @@ MainTab:CreateToggle({
        end,
     })
 
-MainTab:CreateToggle({
-       Name = "ð° Enable Auto Sell",
-       CurrentValue = false,
-       Flag = "ToggleSell",
-       Callback = function(Value)
-            autoSell = Value
-            task.spawn(function()
-                while autoSell do
-                    task.wait(1)
-                    pcall(function()
-                        local shouldSell = true
-                        if sellThreshold > 0 then
-                            local current = getCurrentPotatoes()
-                            if current ~= -1 and current < sellThreshold then
-                                shouldSell = false
-                            end
-                        end
-                        if shouldSell then
-                            local remotes = getRemotes()
-                            if remotes then
-                                if remotes:FindFirstChild("SellAllPotatoes") then remotes.SellAllPotatoes:FireServer() end
-                                if remotes:FindFirstChild("SellAllGoldenPotatoes") then remotes.SellAllGoldenPotatoes:FireServer() end
-                            end
-                        end
-                    end)
-                end
-            end)
-       end,
-    })
-
 MainTab:CreateButton({
        Name = "ð Claim Login & AFK Rewards",
        Callback = function()
@@ -171,32 +141,26 @@ local AutoSellToggle = MainTab:CreateToggle({
          })
 
          task.spawn(function()
-            while AutoSellActive do
-               pcall(function()
-                  local sellTab = game.Players.LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.SellPotatoesTabWrapper.SellTab
-                  if sellTab and firesignal then
-                     firesignal(sellTab.Activated)
-                  end
-                  
-                  task.wait(0.3)
-                  
-                  local goldenSelector = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.ContentArea.ItemsScroll.ManualSellCard.ManualSellContent.SelectorContainer.GoldenSelector
-                  if goldenSelector and firesignal then
-                     firesignal(goldenSelector.Activated)
-                  end
-                  
-                  task.wait(0.3)
-                  
-
-                  local sellButton = game:GetService("Players").VayzEUx.PlayerGui.PotatoGameGUI.Background.ContentArea.ItemsScroll.ManualSellCard.ManualSellContent.ButtonRow.SellAllButton
-                  if sellButton and firesignal then
-                     firesignal(sellButton.Activated)
-                  end
-
-                  task.wait(AutoSellDelay)
-               end)
-            end
-         end)
+                while autoSell do
+                    task.wait(1)
+                    pcall(function()
+                        local shouldSell = true
+                        if sellThreshold > 0 then
+                            local current = getCurrentPotatoes()
+                            if current ~= -1 and current < sellThreshold then
+                                shouldSell = false
+                            end
+                        end
+                        if shouldSell then
+                            local remotes = getRemotes()
+                            if remotes then
+                                if remotes:FindFirstChild("SellAllPotatoes") then remotes.SellAllPotatoes:FireServer() end
+                                if remotes:FindFirstChild("SellAllGoldenPotatoes") then remotes.SellAllGoldenPotatoes:FireServer() end
+                            end
+                        end
+                    end)
+                end
+            end)
       else
          Rayfield:Notify({
             Title = "AutoSell",
