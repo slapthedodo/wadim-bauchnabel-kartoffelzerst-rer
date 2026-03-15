@@ -8,7 +8,6 @@ local autoFarm = false
 local autoUpgradeClick = false
 local autoPrestige = false
 local autoAscension = false
-local autoShop = false
 local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
@@ -79,50 +78,6 @@ local function getRemotes()
             end
         end
         return -1
-    end
-
-    local allowedIcons = {
-        ["rbxassetid://102427394468064"] = "pot",
-        ["rbxassetid://89085234677231"] = "cash",
-        ["rbxassetid://107549977624627"] = "pp",
-        ["rbxassetid://134776730454808 "] = "golden pot"
-    }
-
-    local function scanAndBuy()
-        local potatoGui = LocalPlayer.PlayerGui:FindFirstChild("PotatoGameGUI")
-        if not potatoGui then return end
-        
-        local contentArea = potatoGui.Background.ContentArea
-        local shopGrid = contentArea:FindFirstChild("ShopGridWrapper", true)
-
-        if shopGrid then
-            local items = shopGrid:GetChildren()
-            
-            for _, item in pairs(items) do
-                if item:IsA("Frame") or item:IsA("ImageLabel") or string.find(item.Name, "Item") then
-                    local icon = item:FindFirstChild("CurrencyIcon", true)
-                    local buyButton = item:FindFirstChild("BuyButton", true)
-                    
-                    if icon and icon:IsA("ImageLabel") then
-                        if icon.Image == "" then 
-                            task.wait(0.25) 
-                        end
-                        
-                        if allowedIcons[icon.Image] and buyButton then
-                            for _, eventName in pairs({"MouseButton1Click", "Activated"}) do
-                                local signal = buyButton:FindFirstChild(eventName) or buyButton[eventName]
-                                if signal then
-                                    for _, connection in pairs(getconnections(signal)) do
-                                        connection:Fire()
-                                    end
-                                end
-                            end
-                            task.wait(0.25)
-                        end
-                    end
-                end
-            end
-        end
     end
 
 
@@ -324,39 +279,6 @@ MainTab:CreateToggle({
    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Auto Shop",
-   CurrentValue = false,
-   Flag = "ToggleAutoShop",
-   Callback = function(Value)
-      autoShop = Value
-      if Value then
-          task.spawn(function()
-              while autoShop do
-                  pcall(function()
-                      local shopTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.ShopTabWrapper.ShopTab
-                      if shopTab and firesignal then
-                          firesignal(shopTab.Activated)
-                      end
-                  end)
-                  
-                  task.wait(1)
-                  
-                  for i = 1, 3 do
-                      if not autoShop then break end
-                      pcall(scanAndBuy)
-                      if i < 3 then task.wait(5) end
-                  end
-                  
-                  if autoShop then
-                      task.wait(120)
-                  end
-              end
-          end)
-      end
-   end,
-})
-
 
 
 local SettingsTab = Window:CreateTab("Settings", 4483362458)
@@ -392,7 +314,6 @@ local UnloadButton = SettingsTab:CreateButton({
       autoUpgradeClick = false
       autoPrestige = false
       autoAscension = false
-      autoShop = false
       autoHideNotifications = false
       if notificationConn then notificationConn:Disconnect() end
       AutoSellActive = false
