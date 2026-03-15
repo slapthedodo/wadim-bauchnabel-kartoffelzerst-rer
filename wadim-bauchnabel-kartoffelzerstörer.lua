@@ -185,12 +185,10 @@ local function getOwnedGenerators()
         
         if grid then
             for _, child in pairs(grid:GetChildren()) do
-                if child:IsA("Frame") or child:IsA("ImageLabel") then
-                    local baseName = child.Name:match("^(.*)_OwnedCard")
-                    if baseName then
-                        owned[baseName] = (owned[baseName] or 0) + 1
-                        totalCount = totalCount + 1
-                    end
+                local baseName = child.Name:match("^(.-)_OwnedCard_%d+$")
+                if baseName then
+                    owned[baseName] = (owned[baseName] or 0) + 1
+                    totalCount = totalCount + 1
                 end
             end
         end
@@ -208,20 +206,20 @@ MainTab:CreateToggle({
         if autoGenerator then
             task.spawn(function()
                 while autoGenerator do
-                    local owned, totalCount = getOwnedGenerators()
-                    local bestOwnedIdx = #generatorList
-                    
-                    for i, name in ipairs(generatorList) do
-                        if owned[name] and owned[name] > 0 then
-                            if i < bestOwnedIdx then bestOwnedIdx = i end
-                        end
-                    end
-                    
                     pcall(function()
+                        local owned, totalCount = getOwnedGenerators()
+                        local bestOwnedIdx = #generatorList + 1
+                        
+                        for i, name in ipairs(generatorList) do
+                            if owned[name] and owned[name] > 0 then
+                                if i < bestOwnedIdx then bestOwnedIdx = i end
+                            end
+                        end
+                        
                         local remotes = getRemotes()
                         if remotes then
                             -- Deletion of low tiers (keep best and one below)
-                            if bestOwnedIdx < #generatorList then
+                            if bestOwnedIdx <= #generatorList then
                                 for i = bestOwnedIdx + 2, #generatorList do
                                     local name = generatorList[i]
                                     if owned[name] and owned[name] > 0 then
@@ -229,7 +227,7 @@ MainTab:CreateToggle({
                                             for _ = 1, owned[name] do
                                                 remotes.DeleteGenerator:FireServer(name)
                                                 totalCount = totalCount - 1
-                                                task.wait(0.1)
+                                                task.wait(0.05)
                                             end
                                             owned[name] = 0
                                         end
@@ -238,7 +236,7 @@ MainTab:CreateToggle({
                             end
                             
                             -- Max 15 items limit
-                            while totalCount > 15 do
+                            while totalCount >= 15 do
                                 local worstIdx = 0
                                 for i = #generatorList, 1, -1 do
                                     if owned[generatorList[i]] and owned[generatorList[i]] > 0 then
@@ -251,7 +249,7 @@ MainTab:CreateToggle({
                                     remotes.DeleteGenerator:FireServer(name)
                                     owned[name] = owned[name] - 1
                                     totalCount = totalCount - 1
-                                    task.wait(0.1)
+                                    task.wait(0.05)
                                 else
                                     break
                                 end
@@ -259,10 +257,8 @@ MainTab:CreateToggle({
                         end
                     end)
 
-                    -- Try to buy better than current best, or more of current best
-                    for i = 1, bestOwnedIdx do
+                    for _, genName in ipairs(generatorList) do
                         if not autoGenerator then break end
-                        local genName = generatorList[i]
                         
                         pcall(function()
                             local remotes = getRemotes()
@@ -270,9 +266,9 @@ MainTab:CreateToggle({
                                 remotes.PurchaseGenerator:FireServer(genName)
                             end
                         end)
-                        task.wait(0.1)
+                        
+                        task.wait(.01) 
                     end
-                    task.wait(1)
                 end
             end)
         end
@@ -428,8 +424,8 @@ local shopItemList = {
     "honeycomb_potato", "leopard_potato", "kiwi_potato", "flat_potato", "diamond_potato",
     "obsidian_potato", "ghostly_potato", "mechanical_potato", "enchanted_potato", "camouflage_potato",
     "cloud_potato", "pixel_potato", "emoji_mystery_potato", "mystery_potato", "mystery_potato_3",
-    "potato_eyes", "potion_drop", "potion_production", "potion_click", "potion_luck",
-    "potion_golden", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
+    "potato_eyes", "drop_chance_potion", "production_potion", "click_power_potion", "luck_potion",
+    "golden_potion", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
     "white_potato", "fingerling_potato", "purple_majesty", "sweet_potato", "blue_potato",
     "sprouting_potato", "crystal_potato", "rainbow_potato", "frozen_potato", "volcanic_potato",
     "ancient_potato", "shy_potato", "neon_potato", "shopkeepers_stash", "spud_laboratory"
