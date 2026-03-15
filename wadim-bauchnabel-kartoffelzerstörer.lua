@@ -373,10 +373,6 @@ MainTab:CreateToggle({
                       end)
                       task.wait(0.5)
                   end
-                  
-                  if autoShop then
-                      task.wait(120)
-                  end
               end
           end)
       end
