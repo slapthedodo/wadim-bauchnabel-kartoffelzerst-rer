@@ -108,34 +108,40 @@ local upgradeList = {
 }
 
 MainTab:CreateToggle({
-    Name = "Auto Buy All Upgrades",
+    Name = "Auto Upgrade Click",
     CurrentValue = false,
     Flag = "ToggleUpgrade",
     Callback = function(Value)
         autoUpgradeClick = Value
-        
         if autoUpgradeClick then
             task.spawn(function()
                 while autoUpgradeClick do
-                    -- Gehe die Liste von oben nach unten durch
-                    for _, upgradeName in ipairs(upgradeList) do
-                        -- Falls der Toggle während der Schleife ausgeschaltet wird: Sofort stop!
-                        if not autoUpgradeClick then break end
-                        
-                        pcall(function()
-                            local remotes = getRemotes()
-                            if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                                -- Wir schicken den sauberen Namen an den Server
-                                remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                    -- 1. Erst prüfen: Wie viele Kartoffeln haben wir überhaupt?
+                    local myPotatoes = getCurrentPotatoes()
+                    
+                    -- Nur fortfahren, wenn wir Kartoffeln finden konnten (nicht -1)
+                    if myPotatoes >= 0 then
+                        local remotes = getRemotes()
+                        if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
+                            
+                            -- 2. Die Liste der besten Upgrades durchgehen
+                            for _, upgradeName in ipairs(upgradeList) do
+                                if not autoUpgradeClick then break end
+                                
+                                -- 3. Den Remote ausführen
+                                -- Wir senden den Namen direkt. Der Server prüft selbst, ob das Geld reicht.
+                                pcall(function()
+                                    remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                                end)
+                                
+                                -- Kurze Pause, damit der Server nicht überlastet wird
+                                task.wait(0.1)
                             end
-                        end)
-                        
-                        -- Ganz kurze Pause zwischen den Upgrades (schont die Performance)
-                        task.wait(0.1) 
+                        end
                     end
                     
-                    -- Pause, bevor die Liste von vorne begonnen wird (z.B. alle 5 Sekunden)
-                    task.wait(5) 
+                    -- 4. Wartezeit bis zum nächsten kompletten Durchlauf der Liste
+                    task.wait(2) 
                 end
             end)
         end
