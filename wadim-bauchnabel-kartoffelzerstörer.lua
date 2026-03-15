@@ -10,6 +10,7 @@ local autoPrestige = false
 local autoHideNotifications = false
 local minPP = 1
 local sellThreshold = 0
+local notificationConn
 
 local Window = Rayfield:CreateWindow({
    Name = "karotten script",
@@ -272,25 +273,20 @@ local AutoHideToggle = SettingsTab:CreateToggle({
    Flag = "AutoHide_Notifications",
    Callback = function(Value)
       autoHideNotifications = Value
-      if Value then
-          task.spawn(function()
-              while autoHideNotifications do
-                  task.wait(0.5)
-                  pcall(function()
-                      local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
-                      if container and container.Visible then
-                          container.Visible = false
-                      end
-                  end)
+      if notificationConn then notificationConn:Disconnect() notificationConn = nil end
+      
+      local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
+      if not container then return end
+
+      if autoHideNotifications then
+          container.Visible = false
+          notificationConn = container:GetPropertyChangedSignal("Visible"):Connect(function()
+              if autoHideNotifications then
+                  container.Visible = false
               end
           end)
       else
-          pcall(function()
-              local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
-              if container then
-                  container.Visible = true
-              end
-          end)
+          container.Visible = true
       end
    end,
 })
@@ -302,6 +298,7 @@ local UnloadButton = SettingsTab:CreateButton({
       autoUpgradeClick = false
       autoPrestige = false
       autoHideNotifications = false
+      if notificationConn then notificationConn:Disconnect() end
       AutoSellActive = false
       Rayfield:Destroy()
    end,
