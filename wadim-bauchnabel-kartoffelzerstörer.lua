@@ -108,7 +108,7 @@ local upgradeList = {
 }
 
 MainTab:CreateToggle({
-    Name = "Auto Buy All Upgrades",
+    Name = "Auto Upgrade (Smart Mode)",
     CurrentValue = false,
     Flag = "ToggleUpgrade",
     Callback = function(Value)
@@ -117,18 +117,35 @@ MainTab:CreateToggle({
         if autoUpgradeClick then
             task.spawn(function()
                 while autoUpgradeClick do
-                    for _, upgradeName in ipairs(upgradeList) do
-                        if not autoUpgradeClick then break end
-                        
-                        pcall(function()
-                            local remotes = getRemotes()
-                            if remotes and remotes:FindFirstChild("PurchaseClickUpgrade") then
-                                remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                    local remotes = getRemotes()
+                    if remotes then
+                        local myPotatoes = getCurrentPotatoes()
+                        if myPotatoes >= 0 then
+                            for _, upgradeName in ipairs(upgradeList) do
+                                if not autoUpgradeClick then break end
+                                
+                                local success, cost = pcall(function()
+                                    return remotes.GetUpgradeCost:InvokeServer(upgradeName)
+                                end)
+
+                                local actualCost = type(cost) == "number" and cost or parseNumber(tostring(cost))
+
+                                if success and actualCost and myPotatoes >= actualCost then
+                                    pcall(function()
+                                        remotes.PurchaseClickUpgrade:FireServer(upgradeName)
+                                        print("Erfolgreich gekauft: " .. upgradeName .. " für " .. actualCost)
+                                    end)
+                                    
+                                    task.wait(0.2)
+                                    myPotatoes = getCurrentPotatoes()
+                                end
                             end
-                        end)
-                        
-                        task.wait(0.05) 
+                        end
+                    else
+                        task.wait(1)
                     end
+                    
+                    task.wait(2)
                 end
             end)
         end
