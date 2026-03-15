@@ -424,8 +424,8 @@ local shopItemList = {
     "honeycomb_potato", "leopard_potato", "kiwi_potato", "flat_potato", "diamond_potato",
     "obsidian_potato", "ghostly_potato", "mechanical_potato", "enchanted_potato", "camouflage_potato",
     "cloud_potato", "pixel_potato", "emoji_mystery_potato", "mystery_potato", "mystery_potato_3",
-    "potato_eyes", "drop_chance_potion", "production_potion", "click_power_potion", "luck_potion",
-    "golden_potion", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
+    "potato_eyes", "potion_drop", "potion_production", "potion_click", "potion_luck",
+    "potion_golden", "potato_factory", "russet_potato", "red_potato", "yunko_gold",
     "white_potato", "fingerling_potato", "purple_majesty", "sweet_potato", "blue_potato",
     "sprouting_potato", "crystal_potato", "rainbow_potato", "frozen_potato", "volcanic_potato",
     "ancient_potato", "shy_potato", "neon_potato", "shopkeepers_stash", "spud_laboratory"
