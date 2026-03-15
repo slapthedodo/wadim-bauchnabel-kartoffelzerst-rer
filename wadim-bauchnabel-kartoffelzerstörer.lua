@@ -105,7 +105,7 @@ local function getRemotes()
                     
                     if icon and icon:IsA("ImageLabel") then
                         if icon.Image == "" then 
-                            task.wait(1) 
+                            task.wait(.1) 
                         end
                         
                         if allowedIcons[icon.Image] and buyButton then
@@ -117,7 +117,7 @@ local function getRemotes()
                                     end
                                 end
                             end
-                            task.wait(1)
+                            task.wait(.1)
                         end
                     end
                 end
@@ -342,10 +342,10 @@ MainTab:CreateToggle({
                   
                   task.wait(1)
                   
-                  for i = 1, 5 do
+                  for i = 1, 22 do
                       if not autoShop then break end
                       pcall(scanAndBuy)
-                      if i < 5 then task.wait(5) end
+                      if i < 22 then task.wait(1) end
                   end
                   
                   if autoShop then
