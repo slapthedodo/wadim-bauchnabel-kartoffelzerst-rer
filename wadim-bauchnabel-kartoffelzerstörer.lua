@@ -99,12 +99,12 @@ MainTab:CreateToggle({
     })
 
 local upgradeList = {
-    "stronger_hands", "padded_gloves", "steel_trowel", "golden_trowel",
-    "farmers_instinct", "advanced_techniques", "grandfathers_wisdom",
-    "lunar_planting", "dimensional_reach", "infinite_energy",
-    "omnipotato_blessing", "transcendent_harvest", "galactic_harvest",
-    "universal_potato_power", "infinite_potato_mastery", "omniversal_click",
-    "singularity_tap"
+    "finger_of_god", "singularity_tap", "omniversal_click",
+    "infinite_potato_mastery", "universal_potato_power", "galactic_harvest",
+    "transcendent_harvest", "omnipotato_blessing", "infinite_energy",
+    "dimensional_reach", "lunar_planting", "grandfathers_wisdom",
+    "advanced_techniques", "farmers_instinct", "golden_trowel",
+    "steel_trowel", "padded_gloves", "stronger_hands"
 }
 
 MainTab:CreateToggle({
