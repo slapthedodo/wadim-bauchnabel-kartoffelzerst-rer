@@ -286,6 +286,8 @@ local AutoHideToggle = SettingsTab:CreateToggle({
                       local container = LocalPlayer.PlayerGui.PotatoGameGUI.NotificationContainer
                       if container and container.Visible then
                           container.Visible = false
+                      else
+                        container.Visible = true
                       end
                   end)
               end
