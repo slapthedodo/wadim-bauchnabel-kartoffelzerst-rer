@@ -32,7 +32,7 @@ local Window = Rayfield:CreateWindow({
       GrabKeyFromSite = false,
       Key = {"Hello123"}
    },
-   Keybind = nil
+   Keybind = "None"
 })
 
 local MainTab = Window:CreateTab("Main", 4483362458)
@@ -228,13 +228,16 @@ local UIToggleKeybind = SettingsTab:CreateKeybind({
    HoldToInteract = false,
    Flag = "UI_Toggle_Hotkey",
    Callback = function(Key)
-      Rayfield:ToggleUI()
+      pcall(function() Rayfield:ToggleUI() end)
    end,
 })
 
 local UnloadButton = SettingsTab:CreateButton({
    Name = "Unload UI",
    Callback = function()
+      autoFarm = false
+      autoUpgradeClick = false
+      autoSell = false
       AutoSellActive = false
       Rayfield:Destroy()
    end,
