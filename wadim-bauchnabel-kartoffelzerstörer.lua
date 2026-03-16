@@ -9,6 +9,7 @@ local autoFarm = false
 local autoUpgradeClick = false
 local autoPrestige = false
 local autoAscension = false
+local ascensionType = "abundance"
 local autoShop = false
 local autoGenerator = false
 local autoAntiAFK = false
@@ -403,6 +404,17 @@ MainTab:CreateSlider({
    end,
 })
 
+MainTab:CreateDropdown({
+   Name = "Ascension Type",
+   Options = {"abundance", "prestige", "thrifty"},
+   CurrentOption = {"abundance"},
+   MultipleOptions = false,
+   Flag = "AscensionType",
+   Callback = function(Option)
+      ascensionType = Option[1]
+   end,
+})
+
 MainTab:CreateToggle({
    Name = "Auto Ascension",
    CurrentValue = false,
@@ -418,7 +430,7 @@ MainTab:CreateToggle({
                           local info = remotes.GetAscensionInfo:InvokeServer()
                           if info and info.CanAscend == true then
                               if remotes:FindFirstChild("PerformAscension") then
-                                  remotes.PerformAscension:FireServer("abundance")
+                                  remotes.PerformAscension:FireServer(ascensionType)
                               end
                           end
                       end
