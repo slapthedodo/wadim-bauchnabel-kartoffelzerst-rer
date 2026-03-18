@@ -12,6 +12,7 @@ local autoAscension = false
 local ascensionType = "abundance"
 local autoShop = false
 local autoGenerator = false
+local autoGenerator2 = false
 local autoAntiAFK = false
 local autoHideNotifications = false
 local minPP = 1
@@ -288,6 +289,81 @@ MainTab:CreateToggle({
     end,
 })
 
+MainTab:CreateToggle({
+    Name = "Auto Buy Best Generator 2.0",
+    CurrentValue = false,
+    Flag = "ToggleGenerator2",
+    Callback = function(Value)
+        autoGenerator2 = Value
+        
+        if autoGenerator2 then
+            task.spawn(function()
+                while autoGenerator2 do
+                    task.wait(0.5)
+                    
+                    pcall(function()
+                        local owned, totalCount = getOwnedGenerators()
+                        local bestOwnedIdx = #generatorList + 1
+                        local worstOwnedIdx = 0
+                        
+                        for i, name in ipairs(generatorList) do
+                            if owned[name] and owned[name] > 0 then
+                                if i < bestOwnedIdx then bestOwnedIdx = i end
+                                if i > worstOwnedIdx then worstOwnedIdx = i end
+                            end
+                        end
+                        
+                        local remotes = getRemotes()
+                        if not remotes then return end
+                        
+                        if totalCount >= 15 and worstOwnedIdx > 0 then
+                            local worstName = generatorList[worstOwnedIdx]
+                            remotes.DeleteGenerator:FireServer(worstName)
+                            
+                            local generatorsTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
+                            if generatorsTab and firesignal then firesignal(generatorsTab.Activated) end
+                            
+                            owned[worstName] = owned[worstName] - 1
+                            totalCount = totalCount - 1
+                        end
+                        
+                        if bestOwnedIdx <= #generatorList then
+                            for i = bestOwnedIdx + 2, #generatorList do
+                                local name = generatorList[i]
+                                if owned[name] and owned[name] > 0 then
+                                    remotes.DeleteGenerator:FireServer(name)
+                                    
+                                    local generatorsTab = LocalPlayer.PlayerGui.PotatoGameGUI.Background.NavArea.TabContainer.GeneratorsTabWrapper.GeneratorsTab
+                                    if generatorsTab and firesignal then firesignal(generatorsTab.Activated) end
+                                    
+                                    owned[name] = owned[name] - 1
+                                    totalCount = totalCount - 1
+                                end
+                            end
+                        end
+
+                        if totalCount < 16 then
+                            local startIdx = math.max(1, bestOwnedIdx - 1)
+                            if bestOwnedIdx > #generatorList then startIdx = #generatorList - 2 end
+                            
+                            for i = startIdx, math.min(bestOwnedIdx, #generatorList) do
+                                if not autoGenerator2 then break end
+                                local name = generatorList[i]
+                                
+                                pcall(function()
+                                    if remotes:FindFirstChild("PurchaseGenerator") then
+                                        remotes.PurchaseGenerator:FireServer(name)
+                                    end
+                                end)
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+    end,
+})
+
 MainTab:CreateButton({
        Name = "Claim Login & AFK Rewards",
        Callback = function()
@@ -538,6 +614,7 @@ local UnloadButton = SettingsTab:CreateButton({
       autoFarm = false
       autoUpgradeClick = false
       autoGenerator = false
+      autoGenerator2 = false
       autoAntiAFK = false
       autoPrestige = false
       autoAscension = false
